@@ -1,0 +1,24 @@
+# Local environment and generated files
+conf/
+logs/
+.env
+.env.*
+*.log
+
+# WordPress local state
+app/public/wp-content/uploads/
+app/public/wp-content/cache/
+app/public/wp-content/upgrade/
+app/public/wp-content/backup-db/
+
+# Project docs and planning files kept outside the app codebase
+context/
+feature-specs/
+
+# Node / package manager caches
+node_modules/
+vendor/
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
