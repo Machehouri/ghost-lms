@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "ghost-lms/course-detail",
+  "title": "Course Detail",
+  "category": "widgets",
+  "description": "Display a public course detail page.",
+  "keywords": ["lms", "course", "detail"],
+  "textdomain": "ghost-lms",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "courseId": {
+      "type": "number",
+      "default": 0
+    }
+  },
+  "editorScript": "file:./edit.js"
+}
