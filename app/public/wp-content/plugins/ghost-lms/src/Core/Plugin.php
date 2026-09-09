@@ -12,6 +12,7 @@ namespace GhostLMS\Core;
 use GhostLMS\Access\Capabilities;
 use GhostLMS\Admin\LessonMetaBox;
 use GhostLMS\Admin\Menu;
+use GhostLMS\Blocks\CourseCatalogBlock;
 use GhostLMS\Database\Migrator;
 use GhostLMS\PostTypes\CourseCategoryTaxonomy;
 use GhostLMS\PostTypes\CourseType;
@@ -51,6 +52,9 @@ final class Plugin
 
         $menu = new Menu();
         $menu->register();
+
+        $course_catalog_block = new CourseCatalogBlock();
+        $course_catalog_block->register();
 
         $lesson_meta_box = new LessonMetaBox();
         $lesson_meta_box->register();

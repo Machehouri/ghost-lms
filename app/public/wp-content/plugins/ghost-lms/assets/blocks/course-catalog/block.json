@@ -1,0 +1,20 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "ghost-lms/course-catalog",
+  "title": "Course Catalog",
+  "category": "widgets",
+  "description": "Display a public course catalog.",
+  "keywords": ["lms", "course", "catalog"],
+  "textdomain": "ghost-lms",
+  "supports": {
+    "html": false
+  },
+  "attributes": {
+    "postsPerPage": {
+      "type": "number",
+      "default": 12
+    }
+  },
+  "editorScript": "file:./edit.js"
+}
