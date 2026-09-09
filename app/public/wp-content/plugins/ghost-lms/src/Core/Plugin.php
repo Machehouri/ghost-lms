@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace GhostLMS\Core;
 
+use GhostLMS\Access\Capabilities;
 use GhostLMS\Admin\Menu;
 use GhostLMS\PostTypes\CourseCategoryTaxonomy;
 use GhostLMS\PostTypes\CourseType;
@@ -31,6 +32,8 @@ final class Plugin
 
     public function boot(): void
     {
+        Capabilities::register_hooks();
+
         $registrables = [
             new CourseType(),
             new LessonType(),

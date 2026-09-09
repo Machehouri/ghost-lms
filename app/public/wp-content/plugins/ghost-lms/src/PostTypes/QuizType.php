@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace GhostLMS\PostTypes;
 
+use GhostLMS\Access\Capabilities;
+
 final class QuizType implements Registrable
 {
     public function register(): void
@@ -38,20 +40,20 @@ final class QuizType implements Registrable
                 'capability_type' => 'glms_quiz',
                 'map_meta_cap' => true,
                 'capabilities' => [
-                    'edit_post' => 'edit_glms_quiz',
-                    'read_post' => 'read_glms_quiz',
-                    'delete_post' => 'delete_glms_quiz',
-                    'edit_posts' => 'edit_glms_quizzes',
-                    'edit_others_posts' => 'edit_others_glms_quizzes',
-                    'publish_posts' => 'publish_glms_quizzes',
-                    'read_private_posts' => 'read_private_glms_quizzes',
-                    'delete_posts' => 'delete_glms_quizzes',
-                    'delete_private_posts' => 'delete_private_glms_quizzes',
-                    'delete_published_posts' => 'delete_published_glms_quizzes',
-                    'delete_others_posts' => 'delete_others_glms_quizzes',
-                    'edit_private_posts' => 'edit_private_glms_quizzes',
-                    'edit_published_posts' => 'edit_published_glms_quizzes',
-                    'create_posts' => 'edit_glms_quizzes',
+                    'edit_post' => Capabilities::EDIT_GLMS_QUIZ,
+                    'read_post' => Capabilities::READ_GLMS_QUIZ,
+                    'delete_post' => Capabilities::DELETE_GLMS_QUIZ,
+                    'edit_posts' => Capabilities::EDIT_GLMS_QUIZZES,
+                    'edit_others_posts' => Capabilities::EDIT_OTHERS_GLMS_QUIZZES,
+                    'publish_posts' => Capabilities::PUBLISH_GLMS_QUIZZES,
+                    'read_private_posts' => Capabilities::READ_PRIVATE_GLMS_QUIZZES,
+                    'delete_posts' => Capabilities::DELETE_GLMS_QUIZZES,
+                    'delete_private_posts' => Capabilities::DELETE_PRIVATE_GLMS_QUIZZES,
+                    'delete_published_posts' => Capabilities::DELETE_PUBLISHED_GLMS_QUIZZES,
+                    'delete_others_posts' => Capabilities::DELETE_OTHERS_GLMS_QUIZZES,
+                    'edit_private_posts' => Capabilities::EDIT_PRIVATE_GLMS_QUIZZES,
+                    'edit_published_posts' => Capabilities::EDIT_PUBLISHED_GLMS_QUIZZES,
+                    'create_posts' => Capabilities::EDIT_GLMS_QUIZZES,
                 ],
             ]
         );

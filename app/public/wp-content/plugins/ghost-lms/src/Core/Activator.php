@@ -9,10 +9,13 @@ declare(strict_types=1);
 
 namespace GhostLMS\Core;
 
+use GhostLMS\Access\Capabilities;
+
 final class Activator
 {
     public static function activate(): void
     {
-        // Intentionally left blank for now. Later units add DB schema bootstrap here.
+        Capabilities::register_role();
+        Capabilities::add_admin_capabilities();
     }
 }

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace GhostLMS\PostTypes;
 
+use GhostLMS\Access\Capabilities;
+
 final class CourseType implements Registrable
 {
     public function register(): void
@@ -42,20 +44,20 @@ final class CourseType implements Registrable
                 'capability_type' => 'glms_course',
                 'map_meta_cap' => true,
                 'capabilities' => [
-                    'edit_post' => 'edit_glms_course',
-                    'read_post' => 'read_glms_course',
-                    'delete_post' => 'delete_glms_course',
-                    'edit_posts' => 'edit_glms_courses',
-                    'edit_others_posts' => 'edit_others_glms_courses',
-                    'publish_posts' => 'publish_glms_courses',
-                    'read_private_posts' => 'read_private_glms_courses',
-                    'delete_posts' => 'delete_glms_courses',
-                    'delete_private_posts' => 'delete_private_glms_courses',
-                    'delete_published_posts' => 'delete_published_glms_courses',
-                    'delete_others_posts' => 'delete_others_glms_courses',
-                    'edit_private_posts' => 'edit_private_glms_courses',
-                    'edit_published_posts' => 'edit_published_glms_courses',
-                    'create_posts' => 'edit_glms_courses',
+                    'edit_post' => Capabilities::EDIT_GLMS_COURSE,
+                    'read_post' => Capabilities::READ_GLMS_COURSE,
+                    'delete_post' => Capabilities::DELETE_GLMS_COURSE,
+                    'edit_posts' => Capabilities::EDIT_GLMS_COURSES,
+                    'edit_others_posts' => Capabilities::EDIT_OTHERS_GLMS_COURSES,
+                    'publish_posts' => Capabilities::PUBLISH_GLMS_COURSES,
+                    'read_private_posts' => Capabilities::READ_PRIVATE_GLMS_COURSES,
+                    'delete_posts' => Capabilities::DELETE_GLMS_COURSES,
+                    'delete_private_posts' => Capabilities::DELETE_PRIVATE_GLMS_COURSES,
+                    'delete_published_posts' => Capabilities::DELETE_PUBLISHED_GLMS_COURSES,
+                    'delete_others_posts' => Capabilities::DELETE_OTHERS_GLMS_COURSES,
+                    'edit_private_posts' => Capabilities::EDIT_PRIVATE_GLMS_COURSES,
+                    'edit_published_posts' => Capabilities::EDIT_PUBLISHED_GLMS_COURSES,
+                    'create_posts' => Capabilities::EDIT_GLMS_COURSES,
                 ],
             ]
         );

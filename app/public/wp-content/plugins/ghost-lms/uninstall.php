@@ -11,4 +11,6 @@ if (! defined('WP_UNINSTALL_PLUGIN')) {
     exit;
 }
 
-// Intentionally left blank for now. Real cleanup will be added in later specs.
+require_once __DIR__ . '/vendor/autoload.php';
+
+GhostLMS\Access\Capabilities::remove_role_and_capabilities();

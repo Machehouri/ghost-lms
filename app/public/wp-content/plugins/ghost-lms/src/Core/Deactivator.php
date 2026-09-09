@@ -13,6 +13,6 @@ final class Deactivator
 {
     public static function deactivate(): void
     {
-        // Intentionally left blank for now. No data deletion on deactivation.
+        // Intentionally left blank for now. No capability removal on deactivation.
     }
 }

@@ -9,6 +9,8 @@ declare(strict_types=1);
 
 namespace GhostLMS\PostTypes;
 
+use GhostLMS\Access\Capabilities;
+
 final class QuestionType implements Registrable
 {
     public function register(): void
@@ -38,20 +40,20 @@ final class QuestionType implements Registrable
                 'capability_type' => 'glms_question',
                 'map_meta_cap' => true,
                 'capabilities' => [
-                    'edit_post' => 'edit_glms_question',
-                    'read_post' => 'read_glms_question',
-                    'delete_post' => 'delete_glms_question',
-                    'edit_posts' => 'edit_glms_questions',
-                    'edit_others_posts' => 'edit_others_glms_questions',
-                    'publish_posts' => 'publish_glms_questions',
-                    'read_private_posts' => 'read_private_glms_questions',
-                    'delete_posts' => 'delete_glms_questions',
-                    'delete_private_posts' => 'delete_private_glms_questions',
-                    'delete_published_posts' => 'delete_published_glms_questions',
-                    'delete_others_posts' => 'delete_others_glms_questions',
-                    'edit_private_posts' => 'edit_private_glms_questions',
-                    'edit_published_posts' => 'edit_published_glms_questions',
-                    'create_posts' => 'edit_glms_questions',
+                    'edit_post' => Capabilities::EDIT_GLMS_QUESTION,
+                    'read_post' => Capabilities::READ_GLMS_QUESTION,
+                    'delete_post' => Capabilities::DELETE_GLMS_QUESTION,
+                    'edit_posts' => Capabilities::EDIT_GLMS_QUESTIONS,
+                    'edit_others_posts' => Capabilities::EDIT_OTHERS_GLMS_QUESTIONS,
+                    'publish_posts' => Capabilities::PUBLISH_GLMS_QUESTIONS,
+                    'read_private_posts' => Capabilities::READ_PRIVATE_GLMS_QUESTIONS,
+                    'delete_posts' => Capabilities::DELETE_GLMS_QUESTIONS,
+                    'delete_private_posts' => Capabilities::DELETE_PRIVATE_GLMS_QUESTIONS,
+                    'delete_published_posts' => Capabilities::DELETE_PUBLISHED_GLMS_QUESTIONS,
+                    'delete_others_posts' => Capabilities::DELETE_OTHERS_GLMS_QUESTIONS,
+                    'edit_private_posts' => Capabilities::EDIT_PRIVATE_GLMS_QUESTIONS,
+                    'edit_published_posts' => Capabilities::EDIT_PUBLISHED_GLMS_QUESTIONS,
+                    'create_posts' => Capabilities::EDIT_GLMS_QUESTIONS,
                 ],
             ]
         );
