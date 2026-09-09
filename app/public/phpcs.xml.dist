@@ -1,0 +1,5 @@
+<?xml version="1.0"?>
+<ruleset name="CustomLMSWordPress">
+    <description>Project PHP coding standards for WordPress.</description>
+    <rule ref="./vendor/wp-coding-standards/wpcs/WordPress"/>
+</ruleset>

@@ -1,0 +1,14 @@
+{
+  "name": "custom-lms/wordpress",
+  "description": "WordPress project with PHPCS configured for WordPress coding standards.",
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^3.10",
+    "wp-coding-standards/wpcs": "^3.0"
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
+}
