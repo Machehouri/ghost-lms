@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace GhostLMS\Core;
 
 use GhostLMS\Access\Capabilities;
+use GhostLMS\Database\Migrator;
 
 final class Activator
 {
@@ -17,5 +18,6 @@ final class Activator
     {
         Capabilities::register_role();
         Capabilities::add_admin_capabilities();
+        Migrator::maybe_migrate();
     }
 }

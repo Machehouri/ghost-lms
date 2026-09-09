@@ -26,6 +26,10 @@ if (! defined('GHOST_LMS_VERSION')) {
     define('GHOST_LMS_VERSION', '1.0.0');
 }
 
+if (! defined('GHOST_LMS_DB_VERSION')) {
+    define('GHOST_LMS_DB_VERSION', '1.0.0');
+}
+
 if (! defined('GHOST_LMS_PLUGIN_DIR')) {
     define('GHOST_LMS_PLUGIN_DIR', plugin_dir_path(__FILE__));
 }

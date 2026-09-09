@@ -11,6 +11,7 @@ namespace GhostLMS\Core;
 
 use GhostLMS\Access\Capabilities;
 use GhostLMS\Admin\Menu;
+use GhostLMS\Database\Migrator;
 use GhostLMS\PostTypes\CourseCategoryTaxonomy;
 use GhostLMS\PostTypes\CourseType;
 use GhostLMS\PostTypes\LessonType;
@@ -22,6 +23,7 @@ final class Plugin
     public function register(): void
     {
         add_action('init', [$this, 'load_textdomain'], 5);
+        add_action('plugins_loaded', [Migrator::class, 'maybe_migrate'], 25);
         add_action('init', [$this, 'boot'], 20);
     }
 
