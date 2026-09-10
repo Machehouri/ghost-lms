@@ -280,8 +280,24 @@ final class CourseDetailBlock
         echo '<section class="glms-course-detail__section">';
         echo '<h2>' . esc_html__('Get started', 'ghost-lms') . '</h2>';
         echo '<div class="glms-course-detail__cta">';
-        echo '<button type="button" disabled>' . esc_html__('Coming soon', 'ghost-lms') . '</button>';
-        echo '<p class="glms-course-detail__cta-note">' . esc_html__('Enrollment is not available yet for this course.', 'ghost-lms') . '</p>';
+
+        if ($product_id > 0 && function_exists('wc_get_product')) {
+            $product = wc_get_product($product_id);
+            if ($product) {
+                echo '<div class="glms-course-detail__price">' . wp_kses_post(wc_price($product->get_price())) . '</div>';
+                echo '<form class="cart" method="post" enctype="multipart/form-data">';
+                echo '<input type="hidden" name="add-to-cart" value="' . esc_attr((string) $product_id) . '" />';
+                echo '<button type="submit" class="single_add_to_cart_button button alt">' . esc_html__('Add to Cart', 'ghost-lms') . '</button>';
+                echo '</form>';
+            } else {
+                echo '<button type="button" disabled>' . esc_html__('Coming soon', 'ghost-lms') . '</button>';
+                echo '<p class="glms-course-detail__cta-note">' . esc_html__('This course is linked to a product that is not available yet.', 'ghost-lms') . '</p>';
+            }
+        } else {
+            echo '<button type="button" disabled>' . esc_html__('Coming soon', 'ghost-lms') . '</button>';
+            echo '<p class="glms-course-detail__cta-note">' . esc_html__('Enrollment is not available yet for this course.', 'ghost-lms') . '</p>';
+        }
+
         echo '</div>';
         echo '</section>';
 

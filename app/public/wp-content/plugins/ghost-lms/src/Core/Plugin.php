@@ -12,6 +12,7 @@ namespace GhostLMS\Core;
 use GhostLMS\Access\Capabilities;
 use GhostLMS\Admin\LessonMetaBox;
 use GhostLMS\Admin\Menu;
+use GhostLMS\Admin\ProductLinkMetaBox;
 use GhostLMS\Blocks\CourseCatalogBlock;
 use GhostLMS\Blocks\CourseDetailBlock;
 use GhostLMS\Database\Migrator;
@@ -62,5 +63,8 @@ final class Plugin
 
         $lesson_meta_box = new LessonMetaBox();
         $lesson_meta_box->register();
+
+        $product_link_meta_box = new ProductLinkMetaBox();
+        $product_link_meta_box->register();
     }
 }
