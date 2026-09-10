@@ -1,0 +1,13 @@
+{
+  "$schema": "https://schemas.wp.org/trunk/block.json",
+  "apiVersion": 3,
+  "name": "ghost-lms/my-courses",
+  "title": "My Courses",
+  "category": "widgets",
+  "description": "Display the current user's enrolled courses.",
+  "keywords": ["lms", "course", "enrollment"],
+  "textdomain": "ghost-lms",
+  "supports": {
+    "html": false
+  }
+}

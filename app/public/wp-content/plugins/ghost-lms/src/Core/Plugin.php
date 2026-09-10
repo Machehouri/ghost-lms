@@ -15,6 +15,7 @@ use GhostLMS\Admin\Menu;
 use GhostLMS\Admin\ProductLinkMetaBox;
 use GhostLMS\Blocks\CourseCatalogBlock;
 use GhostLMS\Blocks\CourseDetailBlock;
+use GhostLMS\Blocks\MyCoursesBlock;
 use GhostLMS\Database\Migrator;
 use GhostLMS\PostTypes\CourseCategoryTaxonomy;
 use GhostLMS\PostTypes\CourseType;
@@ -22,6 +23,7 @@ use GhostLMS\PostTypes\LessonType;
 use GhostLMS\PostTypes\QuestionType;
 use GhostLMS\PostTypes\QuizType;
 use GhostLMS\Woo\EnrollmentHooks;
+use GhostLMS\Woo\MyAccountIntegration;
 
 final class Plugin
 {
@@ -62,6 +64,9 @@ final class Plugin
         $course_detail_block = new CourseDetailBlock();
         $course_detail_block->register();
 
+        $my_courses_block = new MyCoursesBlock();
+        $my_courses_block->register();
+
         $lesson_meta_box = new LessonMetaBox();
         $lesson_meta_box->register();
 
@@ -70,5 +75,8 @@ final class Plugin
 
         $enrollment_hooks = new EnrollmentHooks();
         $enrollment_hooks->register();
+
+        $my_account_integration = new MyAccountIntegration();
+        $my_account_integration->register();
     }
 }
