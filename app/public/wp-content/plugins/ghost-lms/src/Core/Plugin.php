@@ -21,6 +21,7 @@ use GhostLMS\PostTypes\CourseType;
 use GhostLMS\PostTypes\LessonType;
 use GhostLMS\PostTypes\QuestionType;
 use GhostLMS\PostTypes\QuizType;
+use GhostLMS\Woo\EnrollmentHooks;
 
 final class Plugin
 {
@@ -66,5 +67,8 @@ final class Plugin
 
         $product_link_meta_box = new ProductLinkMetaBox();
         $product_link_meta_box->register();
+
+        $enrollment_hooks = new EnrollmentHooks();
+        $enrollment_hooks->register();
     }
 }
