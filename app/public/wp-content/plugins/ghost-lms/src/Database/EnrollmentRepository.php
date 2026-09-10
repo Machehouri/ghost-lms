@@ -80,12 +80,14 @@ final class EnrollmentRepository
         global $wpdb;
 
         $table = $wpdb->prefix . 'glms_enrollments';
+        $now = current_time('mysql', true);
         $count = $wpdb->get_var(
             $wpdb->prepare(
-                "SELECT COUNT(*) FROM {$table} WHERE user_id = %d AND course_id = %d AND status = %s",
+                "SELECT COUNT(*) FROM {$table} WHERE user_id = %d AND course_id = %d AND status = %s AND (expires_at IS NULL OR expires_at > %s)",
                 $user_id,
                 $course_id,
-                'active'
+                'active',
+                $now
             )
         );
 

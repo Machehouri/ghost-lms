@@ -22,6 +22,7 @@ use GhostLMS\PostTypes\CourseType;
 use GhostLMS\PostTypes\LessonType;
 use GhostLMS\PostTypes\QuestionType;
 use GhostLMS\PostTypes\QuizType;
+use GhostLMS\Rest\AccessCheckController;
 use GhostLMS\Woo\EnrollmentHooks;
 use GhostLMS\Woo\MyAccountIntegration;
 
@@ -78,5 +79,8 @@ final class Plugin
 
         $my_account_integration = new MyAccountIntegration();
         $my_account_integration->register();
+
+        $access_check_controller = new AccessCheckController();
+        add_action('rest_api_init', [$access_check_controller, 'register']);
     }
 }
