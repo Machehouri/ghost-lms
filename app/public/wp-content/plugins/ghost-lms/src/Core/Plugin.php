@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace GhostLMS\Core;
 
 use GhostLMS\Access\Capabilities;
+use GhostLMS\Admin\CourseSequencingMetaBox;
 use GhostLMS\Admin\LessonMetaBox;
 use GhostLMS\Admin\Menu;
 use GhostLMS\Admin\ProductLinkMetaBox;
@@ -77,6 +78,9 @@ final class Plugin
 
         $product_link_meta_box = new ProductLinkMetaBox();
         $product_link_meta_box->register();
+
+        $course_sequencing_meta_box = new CourseSequencingMetaBox();
+        $course_sequencing_meta_box->register();
 
         $enrollment_hooks = new EnrollmentHooks();
         $enrollment_hooks->register();

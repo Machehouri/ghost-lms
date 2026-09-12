@@ -9,8 +9,9 @@ declare(strict_types=1);
 
 namespace GhostLMS\Frontend;
 
-use GhostLMS\Access\CourseAccess;
 use GhostLMS\Access\Capabilities;
+use GhostLMS\Access\CourseAccess;
+use GhostLMS\Access\LessonUnlockResolver;
 use GhostLMS\Curriculum\CurriculumRepository;
 use GhostLMS\Database\LessonProgressRepository;
 
@@ -66,6 +67,13 @@ final class LessonPlayerController
 
         if (! CourseAccess::current_user_can_view($course->ID)) {
             wp_safe_redirect(add_query_arg('glms_notice', 'enroll', get_permalink($course->ID)));
+            exit;
+        }
+
+        if (! LessonUnlockResolver::is_unlocked(get_current_user_id(), $lesson_id)) {
+            $first_incomplete_lesson_id = LessonUnlockResolver::get_first_incomplete_lesson_id(get_current_user_id(), $course->ID);
+            $redirect_url = 0 !== $first_incomplete_lesson_id ? home_url('/learn/' . $course->post_name . '/' . $first_incomplete_lesson_id . '/') : get_permalink($course->ID);
+            wp_safe_redirect(add_query_arg('glms_notice', 'locked', $redirect_url));
             exit;
         }
 
@@ -129,11 +137,22 @@ final class LessonPlayerController
             foreach ($module['lessons'] as $curriculum_lesson) {
                 $curriculum_lesson_id = (int) $curriculum_lesson['lesson_id'];
                 $is_completed = in_array($curriculum_lesson_id, $completed_ids, true);
+                $is_unlocked = LessonUnlockResolver::is_unlocked(get_current_user_id(), $curriculum_lesson_id);
                 $class = $curriculum_lesson_id === $lesson_id ? ' is-current' : '';
                 echo '<li class="glms-lesson-player__lesson' . esc_attr($class) . '">';
-                echo '<a href="' . esc_url(home_url('/learn/' . $course->post_name . '/' . $curriculum_lesson_id . '/')) . '">';
-                echo '<span class="glms-lesson-player__status" aria-hidden="true">' . ($is_completed ? '&#10003;' : '') . '</span>';
-                echo esc_html($curriculum_lesson['title']) . '</a></li>';
+                if ($is_unlocked) {
+                    echo '<a href="' . esc_url(home_url('/learn/' . $course->post_name . '/' . $curriculum_lesson_id . '/')) . '" aria-disabled="false">';
+                } else {
+                    echo '<span aria-disabled="true" style="cursor: not-allowed; opacity: 0.7; display: inline-block;">';
+                }
+                echo '<span class="glms-lesson-player__status" aria-hidden="true">' . ($is_completed ? '&#10003;' : ($is_unlocked ? '' : '&#128274;')) . '</span>';
+                echo esc_html($curriculum_lesson['title']);
+                if ($is_unlocked) {
+                    echo '</a>';
+                } else {
+                    echo '</span>';
+                }
+                echo '</li>';
             }
             echo '</ul></section>';
         }
