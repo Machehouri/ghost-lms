@@ -68,6 +68,10 @@ student in this unit — sequencing/locking rules are spec 16, not this one.
    Complete" button to the REST route and updating the DOM (checkmark,
    button state) without a full page reload.
 
+Curriculum association synchronization uses one named advisory lock for the
+complete save operation. This deliberately avoids nested `GET_LOCK()` calls,
+so no MySQL 5.7.5+ or MariaDB-specific nested-lock requirement is added.
+
 ## Verification checklist
 - [ ] An enrolled student visiting `/learn/{course-slug}/{lesson-id}/` sees the sidebar and lesson content; video embed renders; attachment link downloads the correct file.
 - [ ] A non-enrolled logged-in user is redirected to the course detail page with a message, not shown lesson content.

@@ -65,13 +65,11 @@ final class CurriculumRepository
     {
         global $wpdb;
 
-        $held_locks = [];
-        $course_lock_name = 'glms_curriculum_course_' . $course_id;
-        if ('1' !== (string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 5)', $course_lock_name))) {
+        // Use one lock because older MySQL/MariaDB versions do not support nested named locks.
+        $lock_name = 'glms_curriculum_save';
+        if ('1' !== (string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 5)', $lock_name))) {
             return;
         }
-
-        $held_locks[] = $course_lock_name;
 
         try {
             $previous_curriculum = get_post_meta($course_id, '_glms_curriculum', true);
@@ -115,16 +113,6 @@ final class CurriculumRepository
 
             $current_lesson_ids = self::lesson_ids($sanitized);
             $lesson_ids = array_unique(array_merge($previous_lesson_ids, $current_lesson_ids));
-            sort($lesson_ids, SORT_NUMERIC);
-
-            foreach ($lesson_ids as $lesson_id) {
-                $lock_name = 'glms_curriculum_lesson_' . $lesson_id;
-                if ('1' !== (string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 5)', $lock_name))) {
-                    return;
-                }
-
-                $held_locks[] = $lock_name;
-            }
 
             update_post_meta($course_id, '_glms_curriculum', $sanitized);
 
@@ -144,9 +132,7 @@ final class CurriculumRepository
                 }
             }
         } finally {
-            foreach (array_reverse($held_locks) as $lock_name) {
-                $wpdb->query($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock_name));
-            }
+            $wpdb->query($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock_name));
         }
     }
 
