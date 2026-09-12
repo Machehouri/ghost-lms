@@ -65,55 +65,70 @@ final class CurriculumRepository
     {
         global $wpdb;
 
-        $previous_curriculum = get_post_meta($course_id, '_glms_curriculum', true);
-        $previous_lesson_ids = is_array($previous_curriculum) ? self::lesson_ids($previous_curriculum) : [];
-        $sanitized = [];
-
-        foreach ($curriculum as $module_index => $module) {
-            if (! is_array($module)) {
-                continue;
-            }
-
-            $module_id = isset($module['module_id']) ? sanitize_key((string) $module['module_id']) : 'module_' . $module_index;
-            $title = isset($module['title']) ? sanitize_text_field((string) $module['title']) : __('Untitled module', 'ghost-lms');
-            $lessons = [];
-
-            if (isset($module['lessons']) && is_array($module['lessons'])) {
-                foreach ($module['lessons'] as $lesson_entry) {
-                    if (! is_array($lesson_entry)) {
-                        continue;
-                    }
-
-                    $lesson_id = isset($lesson_entry['lesson_id']) ? absint($lesson_entry['lesson_id']) : 0;
-                    if ($lesson_id <= 0) {
-                        continue;
-                    }
-
-                    $lessons[] = [
-                        'lesson_id' => $lesson_id,
-                        'order' => isset($lesson_entry['order']) ? absint($lesson_entry['order']) : 0,
-                    ];
-                }
-            }
-
-            $sanitized[] = [
-                'module_id' => $module_id,
-                'title' => $title,
-                'order' => isset($module['order']) ? absint($module['order']) : $module_index,
-                'lessons' => $lessons,
-            ];
+        $held_locks = [];
+        $course_lock_name = 'glms_curriculum_course_' . $course_id;
+        if ('1' !== (string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 5)', $course_lock_name))) {
+            return;
         }
 
-        update_post_meta($course_id, '_glms_curriculum', $sanitized);
+        $held_locks[] = $course_lock_name;
 
-        $current_lesson_ids = self::lesson_ids($sanitized);
-        foreach (array_unique(array_merge($previous_lesson_ids, $current_lesson_ids)) as $lesson_id) {
-            $lock_name = 'glms_curriculum_lesson_' . $lesson_id;
-            if ('1' !== (string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 5)', $lock_name))) {
-                continue;
+        try {
+            $previous_curriculum = get_post_meta($course_id, '_glms_curriculum', true);
+            $previous_lesson_ids = is_array($previous_curriculum) ? self::lesson_ids($previous_curriculum) : [];
+            $sanitized = [];
+
+            foreach ($curriculum as $module_index => $module) {
+                if (! is_array($module)) {
+                    continue;
+                }
+
+                $module_id = isset($module['module_id']) ? sanitize_key((string) $module['module_id']) : 'module_' . $module_index;
+                $title = isset($module['title']) ? sanitize_text_field((string) $module['title']) : __('Untitled module', 'ghost-lms');
+                $lessons = [];
+
+                if (isset($module['lessons']) && is_array($module['lessons'])) {
+                    foreach ($module['lessons'] as $lesson_entry) {
+                        if (! is_array($lesson_entry)) {
+                            continue;
+                        }
+
+                        $lesson_id = isset($lesson_entry['lesson_id']) ? absint($lesson_entry['lesson_id']) : 0;
+                        if ($lesson_id <= 0) {
+                            continue;
+                        }
+
+                        $lessons[] = [
+                            'lesson_id' => $lesson_id,
+                            'order' => isset($lesson_entry['order']) ? absint($lesson_entry['order']) : 0,
+                        ];
+                    }
+                }
+
+                $sanitized[] = [
+                    'module_id' => $module_id,
+                    'title' => $title,
+                    'order' => isset($module['order']) ? absint($module['order']) : $module_index,
+                    'lessons' => $lessons,
+                ];
             }
 
-            try {
+            $current_lesson_ids = self::lesson_ids($sanitized);
+            $lesson_ids = array_unique(array_merge($previous_lesson_ids, $current_lesson_ids));
+            sort($lesson_ids, SORT_NUMERIC);
+
+            foreach ($lesson_ids as $lesson_id) {
+                $lock_name = 'glms_curriculum_lesson_' . $lesson_id;
+                if ('1' !== (string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 5)', $lock_name))) {
+                    return;
+                }
+
+                $held_locks[] = $lock_name;
+            }
+
+            update_post_meta($course_id, '_glms_curriculum', $sanitized);
+
+            foreach ($lesson_ids as $lesson_id) {
                 $course_ids = array_map('absint', (array) get_post_meta($lesson_id, '_glms_course_ids', true));
                 $course_ids = array_values(array_diff($course_ids, [$course_id]));
 
@@ -127,7 +142,9 @@ final class CurriculumRepository
                 } else {
                     update_post_meta($lesson_id, '_glms_course_ids', $course_ids);
                 }
-            } finally {
+            }
+        } finally {
+            foreach (array_reverse($held_locks) as $lock_name) {
                 $wpdb->query($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock_name));
             }
         }
