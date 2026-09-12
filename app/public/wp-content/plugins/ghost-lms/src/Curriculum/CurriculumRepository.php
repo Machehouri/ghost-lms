@@ -63,6 +63,8 @@ final class CurriculumRepository
 
     public static function save(int $course_id, array $curriculum): void
     {
+        global $wpdb;
+
         $previous_curriculum = get_post_meta($course_id, '_glms_curriculum', true);
         $previous_lesson_ids = is_array($previous_curriculum) ? self::lesson_ids($previous_curriculum) : [];
         $sanitized = [];
@@ -104,19 +106,29 @@ final class CurriculumRepository
 
         update_post_meta($course_id, '_glms_curriculum', $sanitized);
 
-        foreach (array_unique(array_merge($previous_lesson_ids, self::lesson_ids($sanitized))) as $lesson_id) {
-            $course_ids = array_map('absint', (array) get_post_meta($lesson_id, '_glms_course_ids', true));
-            $course_ids = array_values(array_diff($course_ids, [$course_id]));
-
-            if (in_array($lesson_id, self::lesson_ids($sanitized), true)) {
-                $course_ids[] = $course_id;
+        $current_lesson_ids = self::lesson_ids($sanitized);
+        foreach (array_unique(array_merge($previous_lesson_ids, $current_lesson_ids)) as $lesson_id) {
+            $lock_name = 'glms_curriculum_lesson_' . $lesson_id;
+            if ('1' !== (string) $wpdb->get_var($wpdb->prepare('SELECT GET_LOCK(%s, 5)', $lock_name))) {
+                continue;
             }
 
-            $course_ids = array_values(array_unique(array_filter($course_ids)));
-            if ([] === $course_ids) {
-                delete_post_meta($lesson_id, '_glms_course_ids');
-            } else {
-                update_post_meta($lesson_id, '_glms_course_ids', $course_ids);
+            try {
+                $course_ids = array_map('absint', (array) get_post_meta($lesson_id, '_glms_course_ids', true));
+                $course_ids = array_values(array_diff($course_ids, [$course_id]));
+
+                if (in_array($lesson_id, $current_lesson_ids, true)) {
+                    $course_ids[] = $course_id;
+                }
+
+                $course_ids = array_values(array_unique(array_filter($course_ids)));
+                if ([] === $course_ids) {
+                    delete_post_meta($lesson_id, '_glms_course_ids');
+                } else {
+                    update_post_meta($lesson_id, '_glms_course_ids', $course_ids);
+                }
+            } finally {
+                $wpdb->query($wpdb->prepare('SELECT RELEASE_LOCK(%s)', $lock_name));
             }
         }
     }

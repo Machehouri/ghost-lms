@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace GhostLMS\Rest;
 
+use GhostLMS\Access\Capabilities;
 use GhostLMS\Access\CourseAccess;
 use GhostLMS\Database\LessonProgressRepository;
 use GhostLMS\Frontend\LessonPlayerController;
@@ -41,17 +42,16 @@ final class LessonProgressController
             return new WP_Error('ghost_lms_login_required', __('You must be logged in to complete a lesson.', 'ghost-lms'), ['status' => 401]);
         }
 
-        $lesson_id = absint($request->get_param('id'));
-        $course_id = absint($request->get_param('course_id'));
-        if ($course_id <= 0 || ! LessonPlayerController::lesson_belongs_to_course($lesson_id, $course_id) || ! CourseAccess::current_user_can_view($course_id)) {
-            return new WP_Error('ghost_lms_forbidden', __('You do not have access to this lesson.', 'ghost-lms'), ['status' => 403]);
-        }
-
-        return true;
+        return $this->validate_completion_request($request);
     }
 
     public function complete(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
+        $validation = $this->validate_completion_request($request);
+        if ($validation instanceof WP_Error) {
+            return $validation;
+        }
+
         $lesson_id = absint($request->get_param('id'));
         $course_id = absint($request->get_param('course_id'));
         if (! LessonProgressRepository::mark_complete(get_current_user_id(), $lesson_id, $course_id)) {
@@ -59,5 +59,20 @@ final class LessonProgressController
         }
 
         return new WP_REST_Response(['completed' => true], 200);
+    }
+
+    private function validate_completion_request(WP_REST_Request $request): bool|WP_Error
+    {
+        $lesson_id = absint($request->get_param('id'));
+        $course_id = absint($request->get_param('course_id'));
+        $course = get_post($course_id);
+        $lesson = get_post($lesson_id);
+        $can_manage_course = $course_id > 0 && Capabilities::current_user_can_manage_course($course_id);
+
+        if (! $course || 'glms_course' !== $course->post_type || ! $lesson || 'glms_lesson' !== $lesson->post_type || ! LessonPlayerController::lesson_belongs_to_course($lesson_id, $course_id) || (! $can_manage_course && ('publish' !== $course->post_status || 'publish' !== $lesson->post_status)) || ! CourseAccess::current_user_can_view($course_id)) {
+            return new WP_Error('ghost_lms_forbidden', __('You do not have access to this lesson.', 'ghost-lms'), ['status' => 403]);
+        }
+
+        return true;
     }
 }

@@ -46,8 +46,9 @@ student in this unit — sequencing/locking rules are spec 16, not this one.
 
 ## Implementation
 1. `src/Database/LessonProgressRepository.php` (first slice — expanded in
-   spec 15): `mark_complete(int $user_id, int $lesson_id, int $course_id):
-   void`, `is_complete(int $user_id, int $lesson_id): bool`,
+  spec 15): `mark_complete(int $user_id, int $lesson_id, int $course_id):
+  bool` — returns true when the progress record is persisted and false when
+  the write fails; `is_complete(int $user_id, int $lesson_id): bool`,
    `get_completed_lesson_ids(int $user_id, int $course_id): array`.
 2. Rewrite rule + query vars for `/learn/{course-slug}/{lesson-id}/`,
    registered on `init`, flushed on plugin activation (extend spec 01's
