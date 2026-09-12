@@ -63,6 +63,8 @@ final class CurriculumRepository
 
     public static function save(int $course_id, array $curriculum): void
     {
+        $previous_curriculum = get_post_meta($course_id, '_glms_curriculum', true);
+        $previous_lesson_ids = is_array($previous_curriculum) ? self::lesson_ids($previous_curriculum) : [];
         $sanitized = [];
 
         foreach ($curriculum as $module_index => $module) {
@@ -101,5 +103,40 @@ final class CurriculumRepository
         }
 
         update_post_meta($course_id, '_glms_curriculum', $sanitized);
+
+        foreach (array_unique(array_merge($previous_lesson_ids, self::lesson_ids($sanitized))) as $lesson_id) {
+            $course_ids = array_map('absint', (array) get_post_meta($lesson_id, '_glms_course_ids', true));
+            $course_ids = array_values(array_diff($course_ids, [$course_id]));
+
+            if (in_array($lesson_id, self::lesson_ids($sanitized), true)) {
+                $course_ids[] = $course_id;
+            }
+
+            $course_ids = array_values(array_unique(array_filter($course_ids)));
+            if ([] === $course_ids) {
+                delete_post_meta($lesson_id, '_glms_course_ids');
+            } else {
+                update_post_meta($lesson_id, '_glms_course_ids', $course_ids);
+            }
+        }
+    }
+
+    private static function lesson_ids(array $curriculum): array
+    {
+        $lesson_ids = [];
+
+        foreach ($curriculum as $module) {
+            if (! is_array($module) || ! isset($module['lessons']) || ! is_array($module['lessons'])) {
+                continue;
+            }
+
+            foreach ($module['lessons'] as $lesson) {
+                if (is_array($lesson) && isset($lesson['lesson_id'])) {
+                    $lesson_ids[] = absint($lesson['lesson_id']);
+                }
+            }
+        }
+
+        return array_values(array_unique(array_filter($lesson_ids)));
     }
 }

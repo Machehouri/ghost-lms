@@ -17,14 +17,14 @@ final class LessonProgressRepository
      * @param int $user_id WordPress user ID.
      * @param int $lesson_id Lesson post ID.
      * @param int $course_id Course post ID.
-     * @return void
+    * @return bool Whether the progress record was persisted.
      */
-    public static function mark_complete(int $user_id, int $lesson_id, int $course_id): void
+    public static function mark_complete(int $user_id, int $lesson_id, int $course_id): bool
     {
         global $wpdb;
 
         $table = $wpdb->prefix . 'glms_lesson_progress';
-        $wpdb->replace(
+        return false !== $wpdb->replace(
             $table,
             [
                 'user_id' => $user_id,

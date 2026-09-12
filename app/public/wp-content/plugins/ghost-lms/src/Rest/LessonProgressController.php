@@ -27,7 +27,10 @@ final class LessonProgressController
                 'methods' => 'POST',
                 'callback' => [$this, 'complete'],
                 'permission_callback' => [$this, 'permission_callback'],
-                'args' => ['id' => ['sanitize_callback' => 'absint']],
+                'args' => [
+                    'id' => ['sanitize_callback' => 'absint'],
+                    'course_id' => ['sanitize_callback' => 'absint'],
+                ],
             ]
         );
     }
@@ -38,19 +41,22 @@ final class LessonProgressController
             return new WP_Error('ghost_lms_login_required', __('You must be logged in to complete a lesson.', 'ghost-lms'), ['status' => 401]);
         }
 
-        $course_id = LessonPlayerController::get_course_id_for_lesson(absint($request->get_param('id')));
-        if ($course_id <= 0 || ! CourseAccess::current_user_can_view($course_id)) {
+        $lesson_id = absint($request->get_param('id'));
+        $course_id = absint($request->get_param('course_id'));
+        if ($course_id <= 0 || ! LessonPlayerController::lesson_belongs_to_course($lesson_id, $course_id) || ! CourseAccess::current_user_can_view($course_id)) {
             return new WP_Error('ghost_lms_forbidden', __('You do not have access to this lesson.', 'ghost-lms'), ['status' => 403]);
         }
 
         return true;
     }
 
-    public function complete(WP_REST_Request $request): WP_REST_Response
+    public function complete(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $lesson_id = absint($request->get_param('id'));
-        $course_id = LessonPlayerController::get_course_id_for_lesson($lesson_id);
-        LessonProgressRepository::mark_complete(get_current_user_id(), $lesson_id, $course_id);
+        $course_id = absint($request->get_param('course_id'));
+        if (! LessonProgressRepository::mark_complete(get_current_user_id(), $lesson_id, $course_id)) {
+            return new WP_Error('ghost_lms_progress_save_failed', __('The lesson completion could not be saved.', 'ghost-lms'), ['status' => 500]);
+        }
 
         return new WP_REST_Response(['completed' => true], 200);
     }

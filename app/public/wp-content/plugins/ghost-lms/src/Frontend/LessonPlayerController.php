@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace GhostLMS\Frontend;
 
 use GhostLMS\Access\CourseAccess;
+use GhostLMS\Access\Capabilities;
 use GhostLMS\Curriculum\CurriculumRepository;
 use GhostLMS\Database\LessonProgressRepository;
 
@@ -50,7 +51,8 @@ final class LessonPlayerController
 
         $course = get_page_by_path(sanitize_title($course_slug), OBJECT, 'glms_course');
         $lesson = get_post($lesson_id);
-        if (! $course || ! $lesson || 'glms_lesson' !== $lesson->post_type || ! self::lesson_belongs_to_course($lesson_id, $course->ID)) {
+        $can_manage_course = $course && Capabilities::current_user_can_manage_course((int) $course->ID);
+        if (! $course || ! $lesson || 'glms_lesson' !== $lesson->post_type || ! self::lesson_belongs_to_course($lesson_id, (int) $course->ID) || (! $can_manage_course && ('publish' !== $course->post_status || 'publish' !== $lesson->post_status))) {
             global $wp_query;
             $wp_query->set_404();
             status_header(404);
@@ -73,20 +75,9 @@ final class LessonPlayerController
 
     public static function get_course_id_for_lesson(int $lesson_id): int
     {
-        $courses = get_posts([
-            'post_type' => 'glms_course',
-            'post_status' => 'publish',
-            'numberposts' => -1,
-            'fields' => 'ids',
-        ]);
+        $course_ids = array_map('absint', (array) get_post_meta($lesson_id, '_glms_course_ids', true));
 
-        foreach ($courses as $course_id) {
-            if (self::lesson_belongs_to_course($lesson_id, (int) $course_id)) {
-                return (int) $course_id;
-            }
-        }
-
-        return 0;
+        return (int) ($course_ids[0] ?? 0);
     }
 
     public static function lesson_belongs_to_course(int $lesson_id, int $course_id): bool
@@ -121,6 +112,8 @@ final class LessonPlayerController
             [
                 'completeUrl' => rest_url('ghost-lms/v1/lessons/' . $lesson_id . '/complete'),
                 'nonce' => wp_create_nonce('wp_rest'),
+                'courseId' => $course_id,
+                'completedLabel' => __('Completed', 'ghost-lms'),
             ]
         );
 
@@ -159,7 +152,14 @@ final class LessonPlayerController
 
         $attachment_id = absint(get_post_meta($lesson_id, '_glms_attachment_id', true));
         if ($attachment_id > 0) {
-            echo '<p><a class="glms-lesson-player__attachment" href="' . esc_url(rest_url('ghost-lms/v1/lessons/' . $lesson_id . '/attachment')) . '">' . esc_html__('Download lesson attachment', 'ghost-lms') . '</a></p>';
+            $attachment_url = add_query_arg(
+                [
+                    'course_id' => $course_id,
+                    '_wpnonce' => wp_create_nonce('wp_rest'),
+                ],
+                rest_url('ghost-lms/v1/lessons/' . $lesson_id . '/attachment')
+            );
+            echo '<p><a class="glms-lesson-player__attachment" href="' . esc_url($attachment_url) . '">' . esc_html__('Download lesson attachment', 'ghost-lms') . '</a></p>';
         }
 
         $is_complete = in_array($lesson_id, $completed_ids, true);

@@ -13,7 +13,9 @@
             method: 'POST',
             headers: {
                 'X-WP-Nonce': window.ghostLmsLessonPlayer.nonce,
+                'Content-Type': 'application/json',
             },
+            body: JSON.stringify({course_id: window.ghostLmsLessonPlayer.courseId}),
         })
             .then(function (response) {
                 if (!response.ok) {
@@ -27,7 +29,7 @@
                     throw new Error('Lesson completion failed.');
                 }
 
-                button.textContent = 'Completed';
+                button.textContent = window.ghostLmsLessonPlayer.completedLabel;
                 document.querySelectorAll('.glms-lesson-player__lesson.is-current .glms-lesson-player__status').forEach(function (status) {
                     status.textContent = '\u2713';
                 });
