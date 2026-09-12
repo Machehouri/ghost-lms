@@ -17,12 +17,15 @@ use GhostLMS\Blocks\CourseCatalogBlock;
 use GhostLMS\Blocks\CourseDetailBlock;
 use GhostLMS\Blocks\MyCoursesBlock;
 use GhostLMS\Database\Migrator;
+use GhostLMS\Frontend\LessonPlayerController;
 use GhostLMS\PostTypes\CourseCategoryTaxonomy;
 use GhostLMS\PostTypes\CourseType;
 use GhostLMS\PostTypes\LessonType;
 use GhostLMS\PostTypes\QuestionType;
 use GhostLMS\PostTypes\QuizType;
 use GhostLMS\Rest\AccessCheckController;
+use GhostLMS\Rest\LessonAttachmentController;
+use GhostLMS\Rest\LessonProgressController;
 use GhostLMS\Woo\EnrollmentHooks;
 use GhostLMS\Woo\MyAccountIntegration;
 
@@ -80,7 +83,16 @@ final class Plugin
         $my_account_integration = new MyAccountIntegration();
         $my_account_integration->register();
 
+        $lesson_player_controller = new LessonPlayerController();
+        $lesson_player_controller->register();
+
         $access_check_controller = new AccessCheckController();
         add_action('rest_api_init', [$access_check_controller, 'register']);
+
+        $lesson_progress_controller = new LessonProgressController();
+        add_action('rest_api_init', [$lesson_progress_controller, 'register']);
+
+        $lesson_attachment_controller = new LessonAttachmentController();
+        add_action('rest_api_init', [$lesson_attachment_controller, 'register']);
     }
 }

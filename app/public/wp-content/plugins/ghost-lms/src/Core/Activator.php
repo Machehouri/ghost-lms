@@ -11,6 +11,7 @@ namespace GhostLMS\Core;
 
 use GhostLMS\Access\Capabilities;
 use GhostLMS\Database\Migrator;
+use GhostLMS\Frontend\LessonPlayerController;
 
 final class Activator
 {
@@ -19,5 +20,7 @@ final class Activator
         Capabilities::register_role();
         Capabilities::add_admin_capabilities();
         Migrator::maybe_migrate();
+        LessonPlayerController::register_rewrite_rules();
+        flush_rewrite_rules();
     }
 }

@@ -1,0 +1,12 @@
+.glms-lesson-player { max-width: 1200px; margin: 0 auto; padding: 24px; color: var(--glms-color-text, #1f2937); }
+.glms-lesson-player__layout { display: grid; grid-template-columns: minmax(220px, 280px) minmax(0, 1fr); gap: 32px; }
+.glms-lesson-player__sidebar { border-right: 1px solid var(--glms-color-border, #e5e7eb); padding-right: 24px; }
+.glms-lesson-player__sidebar ul { list-style: none; margin: 0; padding: 0; }
+.glms-lesson-player__lesson { margin: 4px 0; }
+.glms-lesson-player__lesson a { display: flex; gap: 8px; padding: 8px; color: inherit; text-decoration: none; }
+.glms-lesson-player__lesson.is-current a { background: var(--glms-color-bg-subtle, #f9fafb); color: var(--glms-color-primary, #2563eb); font-weight: 600; }
+.glms-lesson-player__status { width: 20px; color: var(--glms-color-success, #16a34a); }
+.glms-lesson-player__complete { border: 0; border-radius: var(--glms-radius, 8px); background: var(--glms-color-primary, #2563eb); color: #fff; cursor: pointer; padding: 10px 16px; }
+.glms-lesson-player__complete:disabled { background: var(--glms-color-success, #16a34a); cursor: default; }
+.glms-lesson-player__video { margin: 24px 0; }
+@media (max-width: 700px) { .glms-lesson-player__layout { grid-template-columns: 1fr; } .glms-lesson-player__sidebar { border-right: 0; border-bottom: 1px solid var(--glms-color-border, #e5e7eb); padding: 0 0 16px; } }
