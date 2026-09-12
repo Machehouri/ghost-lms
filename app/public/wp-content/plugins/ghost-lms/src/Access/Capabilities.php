@@ -84,7 +84,7 @@ final class Capabilities
      */
     public static function register_hooks(): void
     {
-        add_filter('map_meta_cap', [self::class, 'map_meta_cap']);
+        add_filter('map_meta_cap', [self::class, 'map_meta_cap'], 10, 4);
     }
 
     /**

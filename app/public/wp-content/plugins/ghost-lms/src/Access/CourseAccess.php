@@ -35,7 +35,7 @@ final class CourseAccess
             return false;
         }
 
-        if (EnrollmentRepository::is_enrolled($user_id, $course_id)) {
+        if ('publish' === $course->post_status && EnrollmentRepository::is_enrolled($user_id, $course_id)) {
             return true;
         }
 
