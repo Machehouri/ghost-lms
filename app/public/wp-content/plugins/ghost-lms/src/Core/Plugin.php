@@ -10,6 +10,7 @@ declare(strict_types=1);
 namespace GhostLMS\Core;
 
 use GhostLMS\Access\Capabilities;
+use GhostLMS\Admin\CourseSequencingMetaBox;
 use GhostLMS\Admin\LessonMetaBox;
 use GhostLMS\Admin\Menu;
 use GhostLMS\Admin\ProductLinkMetaBox;
@@ -24,6 +25,7 @@ use GhostLMS\PostTypes\LessonType;
 use GhostLMS\PostTypes\QuestionType;
 use GhostLMS\PostTypes\QuizType;
 use GhostLMS\Rest\AccessCheckController;
+use GhostLMS\Rest\CourseProgressController;
 use GhostLMS\Rest\LessonAttachmentController;
 use GhostLMS\Rest\LessonProgressController;
 use GhostLMS\Woo\EnrollmentHooks;
@@ -77,6 +79,9 @@ final class Plugin
         $product_link_meta_box = new ProductLinkMetaBox();
         $product_link_meta_box->register();
 
+        $course_sequencing_meta_box = new CourseSequencingMetaBox();
+        $course_sequencing_meta_box->register();
+
         $enrollment_hooks = new EnrollmentHooks();
         $enrollment_hooks->register();
 
@@ -88,6 +93,9 @@ final class Plugin
 
         $access_check_controller = new AccessCheckController();
         add_action('rest_api_init', [$access_check_controller, 'register']);
+
+        $course_progress_controller = new CourseProgressController();
+        add_action('rest_api_init', [$course_progress_controller, 'register']);
 
         $lesson_progress_controller = new LessonProgressController();
         add_action('rest_api_init', [$lesson_progress_controller, 'register']);

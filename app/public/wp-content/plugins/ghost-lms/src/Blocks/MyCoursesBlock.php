@@ -9,8 +9,8 @@ declare(strict_types=1);
 
 namespace GhostLMS\Blocks;
 
-use GhostLMS\Access\ProgressStub;
 use GhostLMS\Database\EnrollmentRepository;
+use GhostLMS\Database\LessonProgressRepository;
 use WP_Post;
 
 final class MyCoursesBlock
@@ -77,7 +77,7 @@ final class MyCoursesBlock
             }
 
             $course_id = (int) $course->ID;
-            $progress = ProgressStub::get_course_progress_percent(get_current_user_id(), $course_id);
+            $progress = LessonProgressRepository::get_percent_complete(get_current_user_id(), $course_id);
             $course_url = get_permalink($course);
             echo '<article class="glms-my-courses__card">';
             echo '<h2 class="glms-my-courses__title"><a href="' . esc_url($course_url) . '">' . esc_html(get_the_title($course)) . '</a></h2>';
