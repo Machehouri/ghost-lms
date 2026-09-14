@@ -51,15 +51,14 @@ final class DripRule
 
         switch ($type) {
             case 'fixed_date':
-                $date_value = (string) ($decoded['date'] ?? '');
-                if ('' === $date_value) {
+                if (null === self::parse_fixed_date($decoded['date'] ?? null)) {
                     return null;
                 }
                 break;
 
             case 'days_after_enrollment':
                 $days = $decoded['days'] ?? null;
-                if (! is_numeric($days) || (float) $days != (int) $days || (int) $days <= 0) {
+                if (! is_int($days) || $days <= 0) {
                     return null;
                 }
                 break;
@@ -73,6 +72,27 @@ final class DripRule
         }
 
         return new self($type, $decoded);
+    }
+
+    /**
+     * Parse a fixed-date rule using the site's timezone and documented format.
+     *
+     * @param mixed $value Raw date value.
+     * @return DateTimeImmutable|null
+     */
+    public static function parse_fixed_date(mixed $value): ?DateTimeImmutable
+    {
+        if (! is_string($value) || ! preg_match('/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}$/D', $value)) {
+            return null;
+        }
+
+        $parsed = DateTimeImmutable::createFromFormat('!Y-m-d\TH:i:s', $value, wp_timezone());
+        $errors = DateTimeImmutable::getLastErrors();
+        if (false === $parsed || (is_array($errors) && ($errors['warning_count'] > 0 || $errors['error_count'] > 0))) {
+            return null;
+        }
+
+        return $parsed;
     }
 
     /**
@@ -140,14 +160,8 @@ final class DripRule
     {
         switch ($this->type) {
             case 'fixed_date':
-                $date_value = (string) ($this->config['date'] ?? '');
-                if ('' === $date_value) {
-                    return __('Unlocks on a future date.', 'ghost-lms');
-                }
-
-                try {
-                    $unlock_at = new DateTimeImmutable($date_value, wp_timezone());
-                } catch (\Exception $exception) {
+                $unlock_at = self::parse_fixed_date($this->config['date'] ?? null);
+                if (null === $unlock_at) {
                     return __('Unlocks on a future date.', 'ghost-lms');
                 }
 
@@ -209,14 +223,8 @@ final class DripRule
      */
     private function is_fixed_date_unlocked(): bool
     {
-        $date_value = (string) ($this->config['date'] ?? '');
-        if ('' === $date_value) {
-            return false;
-        }
-
-        try {
-            $unlock_at = new DateTimeImmutable($date_value, wp_timezone());
-        } catch (\Exception $exception) {
+        $unlock_at = self::parse_fixed_date($this->config['date'] ?? null);
+        if (null === $unlock_at) {
             return false;
         }
 
@@ -233,11 +241,9 @@ final class DripRule
     private function is_days_after_enrollment_unlocked(int $user_id, int $course_id): bool
     {
         $days = $this->config['days'] ?? null;
-        if (! is_numeric($days) || (float) $days != (int) $days || (int) $days <= 0) {
+        if (! is_int($days) || $days <= 0) {
             return false;
         }
-
-        $days = (int) $days;
 
         $enrolled_at = EnrollmentRepository::get_enrolled_at($user_id, $course_id);
         if (null === $enrolled_at || '' === $enrolled_at) {

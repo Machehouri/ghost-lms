@@ -56,7 +56,12 @@ final class LessonUnlockResolver
 
         $ordered_lesson_ids = self::ordered_lesson_ids($course_id);
         if ([] === $ordered_lesson_ids) {
-            return true;
+            $drip_rule = DripRule::from_lesson($lesson_id);
+            if (null === $drip_rule) {
+                return true;
+            }
+
+            return $drip_rule->is_satisfied($user_id, $course_id, $lesson_id);
         }
 
         $first_incomplete_lesson_id = self::get_first_incomplete_lesson_id($user_id, $course_id);

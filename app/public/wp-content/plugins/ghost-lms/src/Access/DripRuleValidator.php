@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace GhostLMS\Access;
 
+use GhostLMS\Curriculum\CurriculumRepository;
 use WP_Error;
 
 final class DripRuleValidator
@@ -45,14 +46,7 @@ final class DripRuleValidator
         }
 
         if ('fixed_date' === $type) {
-            $date = (string) ($decoded['date'] ?? '');
-            if ('' === $date) {
-                return new WP_Error('ghost_lms_invalid_drip_rule', __('The fixed-date drip rule is invalid.', 'ghost-lms'));
-            }
-
-            try {
-                new \DateTimeImmutable($date, wp_timezone());
-            } catch (\Exception $exception) {
+            if (null === DripRule::parse_fixed_date($decoded['date'] ?? null)) {
                 return new WP_Error('ghost_lms_invalid_drip_rule', __('The fixed-date drip rule is invalid.', 'ghost-lms'));
             }
 
@@ -61,7 +55,7 @@ final class DripRuleValidator
 
         if ('days_after_enrollment' === $type) {
             $days = $decoded['days'] ?? null;
-            if (! is_numeric($days) || (float) $days != (int) $days || (int) $days <= 0) {
+            if (! is_int($days) || $days <= 0) {
                 return new WP_Error('ghost_lms_invalid_drip_rule', __('The enrollment-delay drip rule must use a positive day count.', 'ghost-lms'));
             }
 
@@ -95,12 +89,43 @@ final class DripRuleValidator
             return new WP_Error('ghost_lms_invalid_drip_rule', __('A prerequisite lesson must belong to the same course.', 'ghost-lms'));
         }
 
+        $curriculum = CurriculumRepository::get($this_course_id);
+        $lesson_position = self::get_curriculum_position($curriculum, $lesson_id);
+        $required_position = self::get_curriculum_position($curriculum, $required_lesson_id);
+        if (null === $lesson_position || null === $required_position || $required_position >= $lesson_position) {
+            return new WP_Error('ghost_lms_invalid_drip_rule', __('A prerequisite lesson must appear earlier in the course curriculum.', 'ghost-lms'));
+        }
+
         $chain = self::collect_prerequisite_chain($required_lesson_id, [$required_lesson_id]);
         if (in_array($lesson_id, $chain, true)) {
             return new WP_Error('ghost_lms_invalid_drip_rule', __('This prerequisite rule would create a circular dependency.', 'ghost-lms'));
         }
 
         return true;
+    }
+
+    /**
+     * Find a lesson's zero-based position in the normalized curriculum.
+     *
+     * @param array<int, array<string, mixed>> $curriculum Normalized curriculum.
+     * @param int $lesson_id Lesson post ID.
+     * @return int|null
+     */
+    private static function get_curriculum_position(array $curriculum, int $lesson_id): ?int
+    {
+        $position = 0;
+
+        foreach ($curriculum as $module) {
+            foreach ($module['lessons'] ?? [] as $lesson) {
+                if (is_array($lesson) && (int) ($lesson['lesson_id'] ?? 0) === $lesson_id) {
+                    return $position;
+                }
+
+                $position++;
+            }
+        }
+
+        return null;
     }
 
     /**

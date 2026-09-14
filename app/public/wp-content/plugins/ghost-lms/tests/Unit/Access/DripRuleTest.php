@@ -10,9 +10,11 @@ declare(strict_types=1);
 namespace GhostLMS\Tests\Unit\Access;
 
 use GhostLMS\Access\DripRule;
+use GhostLMS\Access\DripRuleValidator;
 use GhostLMS\Access\LessonUnlockResolver;
 use GhostLMS\Database\EnrollmentRepository;
 use GhostLMS\Database\LessonProgressRepository;
+use WP_Error;
 use WP_UnitTestCase;
 
 final class DripRuleTest extends WP_UnitTestCase
@@ -118,5 +120,15 @@ final class DripRuleTest extends WP_UnitTestCase
         $rule = DripRule::from_value(wp_json_encode(['type' => 'fixed_date', 'date' => '2027-01-01T00:00:00']));
 
         self::assertStringContainsString('Unlocks', $rule->describe());
+    }
+
+    public function test_prerequisite_must_appear_earlier_in_curriculum(): void
+    {
+        $result = DripRuleValidator::validate(
+            $this->lesson_1_id,
+            wp_json_encode(['type' => 'prerequisite', 'lesson_id' => $this->lesson_2_id])
+        );
+
+        self::assertInstanceOf(WP_Error::class, $result);
     }
 }
