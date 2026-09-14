@@ -95,6 +95,30 @@ final class EnrollmentRepository
     }
 
     /**
+     * Return the enrollment timestamp for a user and course.
+     *
+     * @param int $user_id WordPress user ID.
+     * @param int $course_id Course post ID.
+     * @return string|null
+     */
+    public static function get_enrolled_at(int $user_id, int $course_id): ?string
+    {
+        global $wpdb;
+
+        $table = $wpdb->prefix . 'glms_enrollments';
+        $enrolled_at = $wpdb->get_var(
+            $wpdb->prepare(
+                "SELECT enrolled_at FROM {$table} WHERE user_id = %d AND course_id = %d AND status = %s ORDER BY enrolled_at DESC LIMIT 1",
+                $user_id,
+                $course_id,
+                'active'
+            )
+        );
+
+        return is_string($enrolled_at) && '' !== $enrolled_at ? $enrolled_at : null;
+    }
+
+    /**
      * Return active, non-expired enrollments for a user.
      *
      * @param int $user_id WordPress user ID.
