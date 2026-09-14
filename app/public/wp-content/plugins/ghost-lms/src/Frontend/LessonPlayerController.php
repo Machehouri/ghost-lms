@@ -11,6 +11,7 @@ namespace GhostLMS\Frontend;
 
 use GhostLMS\Access\Capabilities;
 use GhostLMS\Access\CourseAccess;
+use GhostLMS\Access\DripRule;
 use GhostLMS\Access\LessonUnlockResolver;
 use GhostLMS\Curriculum\CurriculumRepository;
 use GhostLMS\Database\LessonProgressRepository;
@@ -151,6 +152,10 @@ final class LessonPlayerController
                     echo '</a>';
                 } else {
                     echo '</span>';
+                    $drip_rule = DripRule::from_lesson($curriculum_lesson_id);
+                    if (null !== $drip_rule) {
+                        echo '<span class="glms-lesson-player__lock-reason">' . esc_html($drip_rule->describe()) . '</span>';
+                    }
                 }
                 echo '</li>';
             }

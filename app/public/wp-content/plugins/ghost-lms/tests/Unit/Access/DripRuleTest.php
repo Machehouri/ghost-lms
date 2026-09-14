@@ -14,7 +14,9 @@ use GhostLMS\Access\DripRuleValidator;
 use GhostLMS\Access\LessonUnlockResolver;
 use GhostLMS\Database\EnrollmentRepository;
 use GhostLMS\Database\LessonProgressRepository;
+use GhostLMS\Rest\LessonDripRuleController;
 use WP_Error;
+use WP_REST_Request;
 use WP_UnitTestCase;
 
 final class DripRuleTest extends WP_UnitTestCase
@@ -130,5 +132,34 @@ final class DripRuleTest extends WP_UnitTestCase
         );
 
         self::assertInstanceOf(WP_Error::class, $result);
+    }
+
+    public function test_drip_rule_controller_can_save_and_clear_a_rule(): void
+    {
+        wp_set_current_user($this->instructor_id);
+        $controller = new LessonDripRuleController();
+
+        $save_request = new WP_REST_Request('PUT', '/ghost-lms/v1/lessons/' . $this->lesson_2_id . '/drip-rule');
+        $save_request->set_body(wp_json_encode(['type' => 'days_after_enrollment', 'days' => 3]));
+        $save_response = $controller->save($save_request);
+
+        self::assertSame(200, $save_response->get_status());
+        self::assertSame('days_after_enrollment', DripRule::from_lesson($this->lesson_2_id)->get_type());
+
+        $clear_request = new WP_REST_Request('PUT', '/ghost-lms/v1/lessons/' . $this->lesson_2_id . '/drip-rule');
+        $clear_request->set_body('null');
+        $clear_response = $controller->save($clear_request);
+
+        self::assertSame(200, $clear_response->get_status());
+        self::assertNull(DripRule::from_lesson($this->lesson_2_id));
+    }
+
+    public function test_non_owner_cannot_manage_a_drip_rule(): void
+    {
+        wp_set_current_user($this->student_id);
+        $request = new WP_REST_Request('PUT', '/ghost-lms/v1/lessons/' . $this->lesson_2_id . '/drip-rule');
+        $controller = new LessonDripRuleController();
+
+        self::assertInstanceOf(WP_Error::class, $controller->permission_callback($request));
     }
 }
