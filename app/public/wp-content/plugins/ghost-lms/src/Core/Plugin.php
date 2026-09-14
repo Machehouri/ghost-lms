@@ -27,6 +27,7 @@ use GhostLMS\PostTypes\QuizType;
 use GhostLMS\Rest\AccessCheckController;
 use GhostLMS\Rest\CourseProgressController;
 use GhostLMS\Rest\LessonAttachmentController;
+use GhostLMS\Rest\LessonDripRuleController;
 use GhostLMS\Rest\LessonProgressController;
 use GhostLMS\Woo\EnrollmentHooks;
 use GhostLMS\Woo\MyAccountIntegration;
@@ -102,5 +103,8 @@ final class Plugin
 
         $lesson_attachment_controller = new LessonAttachmentController();
         add_action('rest_api_init', [$lesson_attachment_controller, 'register']);
+
+        $lesson_drip_rule_controller = new LessonDripRuleController();
+        add_action('rest_api_init', [$lesson_drip_rule_controller, 'register']);
     }
 }
