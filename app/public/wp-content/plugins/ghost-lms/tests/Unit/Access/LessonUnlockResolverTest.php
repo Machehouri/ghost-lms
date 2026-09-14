@@ -106,6 +106,17 @@ final class LessonUnlockResolverTest extends WP_UnitTestCase
         self::assertTrue(LessonUnlockResolver::is_unlocked($this->admin_id, $this->get_lesson_id(3)));
     }
 
+    public function test_drip_rule_applies_when_sequential_curriculum_is_empty(): void
+    {
+        $lesson_id = $this->get_lesson_id(1);
+        update_post_meta($lesson_id, '_glms_course_ids', [$this->course_id]);
+        update_post_meta($lesson_id, '_glms_drip_rule', wp_json_encode(['type' => 'fixed_date', 'date' => '2099-01-01T00:00:00']));
+        update_post_meta($this->course_id, '_glms_sequential_progression', '1');
+        delete_post_meta($this->course_id, '_glms_curriculum');
+
+        self::assertFalse(LessonUnlockResolver::is_unlocked($this->student_id, $lesson_id));
+    }
+
     private function get_lesson_id(int $order): int
     {
         $curriculum = get_post_meta($this->course_id, '_glms_curriculum', true);

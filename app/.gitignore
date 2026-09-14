@@ -1,0 +1,5 @@
+
+# Local SQL dumps containing developer secrets
+sql/*.sql
+**/local.sql
+

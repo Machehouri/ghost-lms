@@ -46,27 +46,57 @@ final class LessonUnlockResolver
         }
 
         if ('1' !== (string) get_post_meta($course_id, '_glms_sequential_progression', true)) {
-            return true;
+            $drip_rule = DripRule::from_lesson($lesson_id);
+            if (null === $drip_rule) {
+                return true;
+            }
+
+            return $drip_rule->is_satisfied($user_id, $course_id, $lesson_id);
         }
 
         $ordered_lesson_ids = self::ordered_lesson_ids($course_id);
         if ([] === $ordered_lesson_ids) {
-            return true;
+            $drip_rule = DripRule::from_lesson($lesson_id);
+            if (null === $drip_rule) {
+                return true;
+            }
+
+            return $drip_rule->is_satisfied($user_id, $course_id, $lesson_id);
         }
 
         $first_incomplete_lesson_id = self::get_first_incomplete_lesson_id($user_id, $course_id);
         if ($first_incomplete_lesson_id <= 0) {
-            return true;
+            $drip_rule = DripRule::from_lesson($lesson_id);
+            if (null === $drip_rule) {
+                return true;
+            }
+
+            return $drip_rule->is_satisfied($user_id, $course_id, $lesson_id);
         }
 
         $current_position = array_search($lesson_id, $ordered_lesson_ids, true);
         $first_incomplete_position = array_search($first_incomplete_lesson_id, $ordered_lesson_ids, true);
 
         if (false === $current_position || false === $first_incomplete_position) {
+            $drip_rule = DripRule::from_lesson($lesson_id);
+            if (null === $drip_rule) {
+                return true;
+            }
+
+            return $drip_rule->is_satisfied($user_id, $course_id, $lesson_id);
+        }
+
+        $sequencing_is_unlocked = $current_position <= $first_incomplete_position;
+        if (! $sequencing_is_unlocked) {
+            return false;
+        }
+
+        $drip_rule = DripRule::from_lesson($lesson_id);
+        if (null === $drip_rule) {
             return true;
         }
 
-        return $current_position <= $first_incomplete_position;
+        return $drip_rule->is_satisfied($user_id, $course_id, $lesson_id);
     }
 
     /**
