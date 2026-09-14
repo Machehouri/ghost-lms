@@ -46,7 +46,13 @@ final class DripRuleValidator
 
         if ('fixed_date' === $type) {
             $date = (string) ($decoded['date'] ?? '');
-            if ('' === $date || false === strtotime($date)) {
+            if ('' === $date) {
+                return new WP_Error('ghost_lms_invalid_drip_rule', __('The fixed-date drip rule is invalid.', 'ghost-lms'));
+            }
+
+            try {
+                new \DateTimeImmutable($date, wp_timezone());
+            } catch (\Exception $exception) {
                 return new WP_Error('ghost_lms_invalid_drip_rule', __('The fixed-date drip rule is invalid.', 'ghost-lms'));
             }
 
@@ -54,8 +60,8 @@ final class DripRuleValidator
         }
 
         if ('days_after_enrollment' === $type) {
-            $days = absint($decoded['days'] ?? 0);
-            if ($days <= 0) {
+            $days = $decoded['days'] ?? null;
+            if (! is_numeric($days) || (float) $days != (int) $days || (int) $days <= 0) {
                 return new WP_Error('ghost_lms_invalid_drip_rule', __('The enrollment-delay drip rule must use a positive day count.', 'ghost-lms'));
             }
 
@@ -85,7 +91,7 @@ final class DripRuleValidator
 
         $this_course_id = self::get_course_for_lesson($lesson_id);
         $required_course_id = self::get_course_for_lesson($required_lesson_id);
-        if ($this_course_id > 0 && $required_course_id > 0 && $this_course_id !== $required_course_id) {
+        if ($this_course_id <= 0 || $required_course_id <= 0 || $this_course_id !== $required_course_id) {
             return new WP_Error('ghost_lms_invalid_drip_rule', __('A prerequisite lesson must belong to the same course.', 'ghost-lms'));
         }
 

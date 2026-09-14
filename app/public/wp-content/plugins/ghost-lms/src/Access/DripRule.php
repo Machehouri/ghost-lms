@@ -9,6 +9,7 @@ declare(strict_types=1);
 
 namespace GhostLMS\Access;
 
+use DateTimeImmutable;
 use GhostLMS\Database\EnrollmentRepository;
 use GhostLMS\Database\LessonProgressRepository;
 
@@ -41,6 +42,34 @@ final class DripRule
         $type = sanitize_key((string) $decoded['type']);
         if ('' === $type) {
             return null;
+        }
+
+        $allowed_types = ['fixed_date', 'days_after_enrollment', 'prerequisite'];
+        if (! in_array($type, $allowed_types, true)) {
+            return null;
+        }
+
+        switch ($type) {
+            case 'fixed_date':
+                $date_value = (string) ($decoded['date'] ?? '');
+                if ('' === $date_value) {
+                    return null;
+                }
+                break;
+
+            case 'days_after_enrollment':
+                $days = $decoded['days'] ?? null;
+                if (! is_numeric($days) || (float) $days != (int) $days || (int) $days <= 0) {
+                    return null;
+                }
+                break;
+
+            case 'prerequisite':
+                $required_lesson_id = $decoded['lesson_id'] ?? null;
+                if (! is_numeric($required_lesson_id) || (int) $required_lesson_id <= 0) {
+                    return null;
+                }
+                break;
         }
 
         return new self($type, $decoded);
@@ -98,7 +127,7 @@ final class DripRule
                 return $this->is_prerequisite_unlocked($user_id);
 
             default:
-                return true;
+                return false;
         }
     }
 
@@ -112,11 +141,17 @@ final class DripRule
         switch ($this->type) {
             case 'fixed_date':
                 $date_value = (string) ($this->config['date'] ?? '');
-                $timestamp = strtotime($date_value);
-                if (false === $timestamp) {
+                if ('' === $date_value) {
                     return __('Unlocks on a future date.', 'ghost-lms');
                 }
-                return sprintf(__('Unlocks %s', 'ghost-lms'), wp_date(get_option('date_format'), $timestamp));
+
+                try {
+                    $unlock_at = new DateTimeImmutable($date_value, wp_timezone());
+                } catch (\Exception $exception) {
+                    return __('Unlocks on a future date.', 'ghost-lms');
+                }
+
+                return sprintf(__('Unlocks %s', 'ghost-lms'), wp_date(get_option('date_format'), $unlock_at->getTimestamp()));
 
             case 'days_after_enrollment':
                 $days = absint($this->config['days'] ?? 0);
@@ -176,15 +211,16 @@ final class DripRule
     {
         $date_value = (string) ($this->config['date'] ?? '');
         if ('' === $date_value) {
-            return true;
-        }
-
-        $timestamp = strtotime($date_value);
-        if (false === $timestamp) {
             return false;
         }
 
-        return current_datetime()->getTimestamp() >= $timestamp;
+        try {
+            $unlock_at = new DateTimeImmutable($date_value, wp_timezone());
+        } catch (\Exception $exception) {
+            return false;
+        }
+
+        return current_datetime()->getTimestamp() >= $unlock_at->getTimestamp();
     }
 
     /**
@@ -196,10 +232,12 @@ final class DripRule
      */
     private function is_days_after_enrollment_unlocked(int $user_id, int $course_id): bool
     {
-        $days = absint($this->config['days'] ?? 0);
-        if ($days <= 0) {
-            return true;
+        $days = $this->config['days'] ?? null;
+        if (! is_numeric($days) || (float) $days != (int) $days || (int) $days <= 0) {
+            return false;
         }
+
+        $days = (int) $days;
 
         $enrolled_at = EnrollmentRepository::get_enrolled_at($user_id, $course_id);
         if (null === $enrolled_at || '' === $enrolled_at) {
