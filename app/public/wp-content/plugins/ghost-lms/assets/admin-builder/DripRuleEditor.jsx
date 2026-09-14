@@ -35,14 +35,16 @@ export default function DripRuleEditor({ lesson, lessons, apiRoot, nonce, onSave
     const [isSaving, setIsSaving] = useState(false);
 
     const badge = getDripBadge(savedRule);
-    const sameCourseLessons = lessons.filter((candidate) => candidate.lesson_id !== lesson.lesson_id);
+    const sameCourseLessons = lessons.filter(
+        (candidate) => candidate.lesson_id !== lesson.lesson_id && candidate.index < lesson.index,
+    );
 
     function buildRule() {
         if (type === 'none') {
             return null;
         }
         if (type === 'fixed_date') {
-            return { type, date };
+            return { type, date: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(date) ? `${date}:00` : date };
         }
         if (type === 'days_after_enrollment') {
             return { type, days: Number(days) };

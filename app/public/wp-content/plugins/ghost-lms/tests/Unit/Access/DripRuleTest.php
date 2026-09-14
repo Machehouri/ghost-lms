@@ -140,6 +140,7 @@ final class DripRuleTest extends WP_UnitTestCase
         $controller = new LessonDripRuleController();
 
         $save_request = new WP_REST_Request('PUT', '/ghost-lms/v1/lessons/' . $this->lesson_2_id . '/drip-rule');
+        $save_request->set_param('id', $this->lesson_2_id);
         $save_request->set_body(wp_json_encode(['type' => 'days_after_enrollment', 'days' => 3]));
         $save_response = $controller->save($save_request);
 
@@ -147,6 +148,7 @@ final class DripRuleTest extends WP_UnitTestCase
         self::assertSame('days_after_enrollment', DripRule::from_lesson($this->lesson_2_id)->get_type());
 
         $clear_request = new WP_REST_Request('PUT', '/ghost-lms/v1/lessons/' . $this->lesson_2_id . '/drip-rule');
+        $clear_request->set_param('id', $this->lesson_2_id);
         $clear_request->set_body('null');
         $clear_response = $controller->save($clear_request);
 
@@ -158,6 +160,7 @@ final class DripRuleTest extends WP_UnitTestCase
     {
         wp_set_current_user($this->student_id);
         $request = new WP_REST_Request('PUT', '/ghost-lms/v1/lessons/' . $this->lesson_2_id . '/drip-rule');
+        $request->set_param('id', $this->lesson_2_id);
         $controller = new LessonDripRuleController();
 
         self::assertInstanceOf(WP_Error::class, $controller->permission_callback($request));

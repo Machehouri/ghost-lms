@@ -3,7 +3,8 @@ import DripRuleEditor, { getDripBadge } from './DripRuleEditor';
 export default function LessonList({ lessons, apiRoot, nonce, onLessonSaved }) {
     return (
         <ul className="glms-lesson-list">
-            {lessons.map((lesson) => {
+            {lessons.map((lesson, index) => {
+                const orderedLesson = { ...lesson, index };
                 const badge = getDripBadge(lesson.dripRule);
                 return (
                     <li className="glms-lesson-list__item" key={lesson.lesson_id}>
@@ -12,8 +13,8 @@ export default function LessonList({ lessons, apiRoot, nonce, onLessonSaved }) {
                             <span aria-hidden="true">{badge.icon}</span>
                         </span>
                         <DripRuleEditor
-                            lesson={lesson}
-                            lessons={lessons}
+                            lesson={orderedLesson}
+                            lessons={lessons.map((candidate, candidateIndex) => ({ ...candidate, index: candidateIndex }))}
                             apiRoot={apiRoot}
                             nonce={nonce}
                             onSaved={onLessonSaved}
