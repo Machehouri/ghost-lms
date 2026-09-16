@@ -46,6 +46,11 @@ final class Plugin
         load_plugin_textdomain('ghost-lms', false, dirname(plugin_basename(GHOST_LMS_PLUGIN_FILE)) . '/languages');
     }
 
+    /**
+     * Register the plugin features after WordPress initializes.
+     *
+     * @return void
+     */
     public function boot(): void
     {
         Capabilities::register_hooks();

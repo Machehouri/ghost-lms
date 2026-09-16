@@ -134,6 +134,11 @@ final class DripRuleTest extends WP_UnitTestCase
         self::assertInstanceOf(WP_Error::class, $result);
     }
 
+    /**
+     * Verify that an instructor can save and clear a lesson drip rule.
+     *
+     * @return void
+     */
     public function test_drip_rule_controller_can_save_and_clear_a_rule(): void
     {
         wp_set_current_user($this->instructor_id);
@@ -156,6 +161,11 @@ final class DripRuleTest extends WP_UnitTestCase
         self::assertNull(DripRule::from_lesson($this->lesson_2_id));
     }
 
+    /**
+     * Verify that a non-owner cannot manage a lesson drip rule.
+     *
+     * @return void
+     */
     public function test_non_owner_cannot_manage_a_drip_rule(): void
     {
         wp_set_current_user($this->student_id);

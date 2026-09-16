@@ -1,5 +1,11 @@
 import DripRuleEditor, { getDripBadge } from './DripRuleEditor';
 
+/**
+ * Render course lessons with their drip status and editing controls.
+ *
+ * @param {Object} props Component properties.
+ * @return {JSX.Element} Lesson list markup.
+ */
 export default function LessonList({ lessons, apiRoot, nonce, onLessonSaved }) {
     return (
         <ul className="glms-lesson-list">

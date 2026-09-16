@@ -15,6 +15,12 @@ const BADGE_LABELS = {
     prerequisite: 'Prerequisite drip rule',
 };
 
+/**
+ * Build the display metadata for a lesson's saved drip rule.
+ *
+ * @param {Object|null} rule Saved drip-rule configuration.
+ * @return {Object} Badge label, icon, and rule type.
+ */
 export function getDripBadge(rule) {
     const type = rule?.type || 'none';
     return {
@@ -24,6 +30,12 @@ export function getDripBadge(rule) {
     };
 }
 
+/**
+ * Render controls for editing a lesson's drip rule.
+ *
+ * @param {Object} props Component properties.
+ * @return {JSX.Element} Drip-rule editor controls.
+ */
 export default function DripRuleEditor({ lesson, lessons, apiRoot, nonce, onSaved }) {
     const savedRule = lesson.dripRule || null;
     const [isOpen, setIsOpen] = useState(false);
@@ -39,6 +51,11 @@ export default function DripRuleEditor({ lesson, lessons, apiRoot, nonce, onSave
         (candidate) => candidate.lesson_id !== lesson.lesson_id && candidate.index < lesson.index,
     );
 
+    /**
+     * Convert the current form state into a REST API payload.
+     *
+     * @return {Object|null} Drip-rule payload, or null to clear the rule.
+     */
     function buildRule() {
         if (type === 'none') {
             return null;
@@ -52,6 +69,11 @@ export default function DripRuleEditor({ lesson, lessons, apiRoot, nonce, onSave
         return { type, lesson_id: Number(prerequisiteLesson) };
     }
 
+    /**
+     * Persist the current rule and roll back the optimistic update on failure.
+     *
+     * @return {Promise<void>} Promise resolved after the save attempt completes.
+     */
     async function saveRule() {
         const previousRule = lesson.dripRule;
         const nextRule = buildRule();

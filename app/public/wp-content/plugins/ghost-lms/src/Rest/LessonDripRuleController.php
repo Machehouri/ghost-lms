@@ -18,6 +18,11 @@ use WP_REST_Response;
 
 final class LessonDripRuleController
 {
+    /**
+     * Register the lesson drip-rule REST route.
+     *
+     * @return void
+     */
     public function register(): void
     {
         register_rest_route(
@@ -34,6 +39,12 @@ final class LessonDripRuleController
         );
     }
 
+    /**
+     * Check whether the current user may manage the lesson's course.
+     *
+     * @param WP_REST_Request $request Current REST request.
+     * @return bool|WP_Error True when allowed, otherwise a permission error.
+     */
     public function permission_callback(WP_REST_Request $request): bool|WP_Error
     {
         $lesson_id = absint($request->get_param('id'));
@@ -47,6 +58,12 @@ final class LessonDripRuleController
         return true;
     }
 
+    /**
+     * Save or clear a lesson's drip rule.
+     *
+     * @param WP_REST_Request $request Current REST request.
+     * @return WP_REST_Response|WP_Error Saved rule response or validation error.
+     */
     public function save(WP_REST_Request $request): WP_REST_Response|WP_Error
     {
         $lesson_id = absint($request->get_param('id'));
@@ -80,6 +97,12 @@ final class LessonDripRuleController
         );
     }
 
+    /**
+     * Encode a decoded JSON object for validation and storage.
+     *
+     * @param mixed $payload Decoded request payload.
+     * @return string|false Encoded payload, or false for an invalid payload.
+     */
     private function encode_payload(mixed $payload): string|false
     {
         if (! is_array($payload)) {
@@ -91,6 +114,10 @@ final class LessonDripRuleController
     }
 
     /**
+     * Build the REST representation of a stored drip rule.
+     *
+     * @param DripRule $rule      Parsed drip rule.
+     * @param string   $rule_json Stored JSON configuration.
      * @return array<string, mixed>
      */
     private function get_rule_response(DripRule $rule, string $rule_json): array
@@ -103,6 +130,12 @@ final class LessonDripRuleController
         ];
     }
 
+    /**
+     * Get the first course associated with a lesson.
+     *
+     * @param int $lesson_id Lesson post ID.
+     * @return int Associated course post ID, or zero when none exists.
+     */
     private function get_course_id(int $lesson_id): int
     {
         return (int) (array_map('absint', (array) get_post_meta($lesson_id, '_glms_course_ids', true))[0] ?? 0);

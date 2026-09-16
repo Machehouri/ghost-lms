@@ -102,6 +102,13 @@ final class LessonPlayerController
         return false;
     }
 
+    /**
+     * Render the lesson player for an accessible course lesson.
+     *
+     * @param int $course_id Course post ID.
+     * @param int $lesson_id Lesson post ID.
+     * @return void
+     */
     private function render_player(int $course_id, int $lesson_id): void
     {
         $course = get_post($course_id);
