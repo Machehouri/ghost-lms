@@ -1,0 +1,12 @@
+{
+  "name": "ghost-lms-admin-builder",
+  "version": "1.0.0",
+  "description": "Course builder admin interface for Ghost LMS",
+  "scripts": {
+    "start": "wp-scripts start",
+    "build": "wp-scripts build"
+  },
+  "devDependencies": {
+    "@wordpress/scripts": "^26.0.0"
+  }
+}

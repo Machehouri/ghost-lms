@@ -9,7 +9,13 @@ declare(strict_types=1);
 
 namespace GhostLMS\Core;
 
+if (! defined('ABSPATH')) {
+    exit;
+}
+
 use GhostLMS\Access\Capabilities;
+use GhostLMS\Admin\CourseBuilderPage;
+use GhostLMS\Admin\CourseEditMetaBox;
 use GhostLMS\Admin\CourseSequencingMetaBox;
 use GhostLMS\Admin\LessonMetaBox;
 use GhostLMS\Admin\Menu;
@@ -26,6 +32,7 @@ use GhostLMS\PostTypes\QuestionType;
 use GhostLMS\PostTypes\QuizType;
 use GhostLMS\Rest\AccessCheckController;
 use GhostLMS\Rest\CourseProgressController;
+use GhostLMS\Rest\CurriculumController;
 use GhostLMS\Rest\LessonAttachmentController;
 use GhostLMS\Rest\LessonDripRuleController;
 use GhostLMS\Rest\LessonProgressController;
@@ -88,6 +95,12 @@ final class Plugin
         $course_sequencing_meta_box = new CourseSequencingMetaBox();
         $course_sequencing_meta_box->register();
 
+        $course_edit_meta_box = new CourseEditMetaBox();
+        $course_edit_meta_box->register();
+
+        $course_builder_page = new CourseBuilderPage();
+        $course_builder_page->register();
+
         $enrollment_hooks = new EnrollmentHooks();
         $enrollment_hooks->register();
 
@@ -111,5 +124,8 @@ final class Plugin
 
         $lesson_drip_rule_controller = new LessonDripRuleController();
         add_action('rest_api_init', [$lesson_drip_rule_controller, 'register']);
+
+        $curriculum_controller = new CurriculumController();
+        add_action('rest_api_init', [$curriculum_controller, 'register']);
     }
 }

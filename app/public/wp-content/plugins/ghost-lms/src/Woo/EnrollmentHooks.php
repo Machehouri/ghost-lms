@@ -9,6 +9,10 @@ declare(strict_types=1);
 
 namespace GhostLMS\Woo;
 
+if (! defined('ABSPATH')) {
+    exit;
+}
+
 use GhostLMS\Database\EnrollmentRepository;
 use WC_Order;
 use WC_Order_Item_Product;
@@ -39,6 +43,11 @@ final class EnrollmentHooks
             }
 
             $product_id = (int) $item->get_product_id();
+            $product = $item->get_product();
+            if (! $product || 'simple' !== $product->get_type()) {
+                continue;
+            }
+
             $course_id = (int) get_post_meta($product_id, '_glms_course_id', true);
 
             if ($course_id <= 0) {
@@ -59,7 +68,18 @@ final class EnrollmentHooks
 
             $already_enrolled = EnrollmentRepository::is_enrolled($user_id, $course_id);
             if ($already_enrolled) {
+                // Defense-in-depth: re-verify product type before reactivating enrollment
+                $product_verify = wc_get_product($product_id);
+                if (! $product_verify || 'simple' !== $product_verify->get_type()) {
+                    continue;
+                }
                 EnrollmentRepository::create_or_reactivate($user_id, $course_id, $order_id);
+                continue;
+            }
+
+            // Defense-in-depth: re-verify product type before creating enrollment
+            $product_verify = wc_get_product($product_id);
+            if (! $product_verify || 'simple' !== $product_verify->get_type()) {
                 continue;
             }
 

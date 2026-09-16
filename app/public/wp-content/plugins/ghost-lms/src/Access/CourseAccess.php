@@ -9,7 +9,10 @@ declare(strict_types=1);
 
 namespace GhostLMS\Access;
 
-use GhostLMS\Access\Capabilities;
+if (! defined('ABSPATH')) {
+    exit;
+}
+
 use GhostLMS\Database\EnrollmentRepository;
 use WP_Error;
 use WP_REST_Request;
@@ -39,15 +42,7 @@ final class CourseAccess
             return true;
         }
 
-        if ($user_id === get_current_user_id() && Capabilities::current_user_can_manage_course($course_id)) {
-            return true;
-        }
-
-        if (user_can($user_id, 'manage_options')) {
-            return true;
-        }
-
-        return (int) $course->post_author === $user_id;
+        return Capabilities::user_can_manage_course($user_id, $course_id);
     }
 
     /**

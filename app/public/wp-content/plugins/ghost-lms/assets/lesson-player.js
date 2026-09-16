@@ -38,4 +38,31 @@
                 button.disabled = false;
             });
     });
+
+    // Handle attachment download via REST API
+    const attachmentLink = document.querySelector('.glms-lesson-player__attachment');
+    if (attachmentLink) {
+        attachmentLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            const url = attachmentLink.href;
+
+            fetch(url)
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('Failed to get attachment URL.');
+                    }
+                    return response.json();
+                })
+                .then(function (data) {
+                    if (data.url) {
+                        window.location.href = data.url;
+                    } else {
+                        throw new Error('Invalid attachment response.');
+                    }
+                })
+                .catch(function () {
+                    alert('Failed to download attachment.');
+                });
+        });
+    }
 }());
