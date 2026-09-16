@@ -6,6 +6,7 @@
 .glms-lesson-player__lesson a { display: flex; gap: 8px; padding: 8px; color: inherit; text-decoration: none; }
 .glms-lesson-player__lesson.is-current a { background: var(--glms-color-bg-subtle, #f9fafb); color: var(--glms-color-primary, #2563eb); font-weight: 600; }
 .glms-lesson-player__status { width: 20px; color: var(--glms-color-success, #16a34a); }
+.glms-lesson-player__lock-reason { display: block; margin: 0 8px 8px 28px; color: var(--glms-color-text-muted, #6b7280); font-size: 0.875em; }
 .glms-lesson-player__complete { border: 0; border-radius: var(--glms-radius, 8px); background: var(--glms-color-primary, #2563eb); color: #fff; cursor: pointer; padding: 10px 16px; }
 .glms-lesson-player__complete:disabled { background: var(--glms-color-success, #16a34a); cursor: default; }
 .glms-lesson-player__video { margin: 24px 0; }
